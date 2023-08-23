@@ -1,0 +1,34 @@
+{
+  "name": "acodex-server",
+  "version": "1.0.2",
+  "description": "A server of Acode AcodeX plugin",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "bin": {
+    "acodeX-server": "index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bajrangCoder/acodex-server.git"
+  },
+  "keywords": [
+    "acode",
+    "acodeX",
+    "terminal",
+    "server",
+    "cli"
+  ],
+  "author": "Raunak Raj <bajrangcoders@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bajrangCoder/acodex-server/issues"
+  },
+  "homepage": "https://github.com/bajrangCoder/acodex-server#readme",
+  "dependencies": {
+    "node-pty": "^1.0.0",
+    "ws": "^8.13.0"
+  }
+}
