@@ -18,4 +18,6 @@ Run `acodeX-server` to start server
 acodeX-server
 ```
 
+> More features comming soon...
+
 :)
