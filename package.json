@@ -1,6 +1,6 @@
 {
   "name": "acodex-server",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A server of Acode AcodeX plugin",
   "main": "index.js",
   "scripts": {
