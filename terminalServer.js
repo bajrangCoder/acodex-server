@@ -2,12 +2,16 @@ const express = require("express");
 const expressWs = require("express-ws");
 const os = require("os");
 const pty = require("node-pty");
-const http = require('http');
+const http = require("http");
 const fs = require("fs");
-const cors = require("cors")
+const cors = require("cors");
+const { Terminal } = require("xterm-headless");
+const { SerializeAddon } = require("xterm-addon-serialize");
 
 /** Whether to use binary transport. */
 const USE_BINARY = os.platform() !== "win32";
+
+const sessions = {};
 
 function startServer() {
     const app = express();
@@ -15,31 +19,19 @@ function startServer() {
     const server = http.createServer(app);
     const appWs = expressWs(app, server);
 
-    const terminals = {};
-    const unsentOutput = {};
-    const temporaryDisposable = {};
-    //const terminalState = {};
-
     app.post("/terminals", (req, res) => {
-        /** @type {{ [key: string]: string }} */
-        const env = {};
-        for (const k of Object.keys(process.env)) {
-            const v = process.env[k];
-            if (v) {
-                env[k] = v;
-            }
-        }
-        // const env = Object.assign({}, process.env);
+        const env = { ...process.env };
         env["COLORTERM"] = "truecolor";
-        if (
-            typeof req.query.cols !== "string" ||
-            typeof req.query.rows !== "string"
-        ) {
+
+        const { cols, rows } = req.query;
+        if (typeof cols !== "string" || typeof rows !== "string") {
             console.error({ req });
             throw new Error("Unexpected query args");
         }
-        const cols = parseInt(req.query.cols);
-        const rows = parseInt(req.query.rows);
+
+        const colsInt = parseInt(cols);
+        const rowsInt = parseInt(rows);
+
         const term = pty.spawn(
             process.platform === "win32"
                 ? "pwsh.exe"
@@ -47,162 +39,128 @@ function startServer() {
             [],
             {
                 name: "xterm-256color",
-                cols: cols ?? 80,
-                rows: rows ?? 24,
+                cols: colsInt || 80,
+                rows: rowsInt || 24,
                 cwd: process.platform === "win32" ? undefined : env.HOME,
                 env,
                 encoding: USE_BINARY ? null : "utf8",
             }
         );
 
-        console.log("Created terminal with PID: " + term.pid);
-        terminals[term.pid] = term;
-        unsentOutput[term.pid] = "";
-        temporaryDisposable[term.pid] = term.onData(function (data) {
-            unsentOutput[term.pid] += data;
-            //terminalState[term.pid] += data;
+        const xterm = new Terminal({
+            rows: rowsInt || 24,
+            cols: colsInt || 80,
+            allowProposedApi: true,
         });
+        const serializeAddon = new SerializeAddon();
+        xterm.loadAddon(serializeAddon);
+
+        console.log("Created terminal with PID: " + term.pid);
+
+        sessions[term.pid] = {
+            term,
+            xterm,
+            serializeAddon,
+            dataHandler: null,
+            terminalData: "",
+        };
+
+        sessions[term.pid].temporaryDisposable = term.onData((data) => {
+            sessions[term.pid].terminalData += data;
+        });
+
         res.send(term.pid.toString());
         res.end();
     });
 
     app.post("/terminals/:pid/size", (req, res) => {
-        if (
-            typeof req.query.cols !== "string" ||
-            typeof req.query.rows !== "string"
-        ) {
-            console.error({ req });
-            throw new Error("Unexpected query args");
-        }
         const pid = parseInt(req.params.pid);
-        const cols = parseInt(req.query.cols);
-        const rows = parseInt(req.query.rows);
-        const term = terminals[pid];
+        const { cols, rows } = req.query;
+        const colsInt = parseInt(cols);
+        const rowsInt = parseInt(rows);
 
-        term.resize(cols, rows);
-        console.log(
+        const { term, xterm } = sessions[pid];
+
+        term.resize(colsInt, rowsInt);
+        xterm.resize(colsInt, rowsInt);
+        /*console.log(
             "Resized terminal " +
                 pid +
                 " to " +
-                cols +
+                colsInt +
                 " cols and " +
-                rows +
+                rowsInt +
                 " rows."
-        );
+        );*/
         res.end();
     });
 
     app.ws("/terminals/:pid", function (ws, req) {
-        const term = terminals[parseInt(req.params.pid)];
+        const pid = parseInt(req.params.pid);
+        const { term, xterm, serializeAddon, terminalData } = sessions[pid];
+
         console.log("Connected to terminal " + term.pid);
-        temporaryDisposable[term.pid].dispose();
-        delete temporaryDisposable[term.pid];
-        ws.send(unsentOutput[term.pid]);
-        delete unsentOutput[term.pid];
-        // unbuffered delivery after user input
-        let userInput = false;
-
-        // string message buffering
-        function buffer(socket, timeout, maxSize) {
-            let s = "";
-            let sender = null;
-            return (data) => {
-                s += data;
-                if (s.length > maxSize || userInput) {
-                    userInput = false;
-                    socket.send(s);
-                    s = "";
-                    if (sender) {
-                        clearTimeout(sender);
-                        sender = null;
-                    }
-                } else if (!sender) {
-                    sender = setTimeout(() => {
-                        socket.send(s);
-                        s = "";
-                        sender = null;
-                    }, timeout);
-                }
-            };
+        // Clear unsentOutput as it will be sent when connecting to an existing terminal
+        if (sessions[pid].temporaryDisposable && terminalData) {
+            sessions[pid].temporaryDisposable.dispose();
+            delete sessions[pid].temporaryDisposable;
+            xterm.write(sessions[pid].terminalData);
+            ws.send(sessions[pid].terminalData)
+        }else{
+            sessions[pid].terminalData = serializeAddon.serialize();
+            // Send the terminal data to the client
+            ws.send(sessions[pid].terminalData);
+            term.resume();
         }
-        // binary message buffering
-        function bufferUtf8(socket, timeout, maxSize) {
-            const chunks = [];
-            let length = 0;
-            let sender = null;
-            return (data) => {
-                chunks.push(data);
-                length += data.length;
-                if (length > maxSize || userInput) {
-                    userInput = false;
-                    socket.send(Buffer.concat(chunks));
-                    chunks.length = 0;
-                    length = 0;
-                    if (sender) {
-                        clearTimeout(sender);
-                        sender = null;
-                    }
-                } else if (!sender) {
-                    sender = setTimeout(() => {
-                        socket.send(Buffer.concat(chunks));
-                        chunks.length = 0;
-                        length = 0;
-                        sender = null;
-                    }, timeout);
-                }
-            };
-        }
-        const send = (USE_BINARY ? bufferUtf8 : buffer)(ws, 3, 262144);
 
-        // WARNING: This is a naive implementation that will not throttle the flow of data. This means
-        // it could flood the communication channel and make the terminal unresponsive. Learn more about
-        // the problem and how to implement flow control at https://xtermjs.org/docs/guides/flowcontrol/
-        term.onData(function (data) {
+        sessions[pid].dataHandler = term.onData(function (data) {
             try {
-                //terminalState[term.pid] += data
-                send(data);
+                ws.send(data);
+                xterm.write(
+                    typeof data === "string" ? data : new Uint8Array(data)
+                );
+                
             } catch (ex) {
                 // The WebSocket is not open, ignore
             }
         });
+
         ws.on("message", function (msg) {
             term.write(msg);
-            userInput = true;
-            
         });
+
         ws.on("close", function () {
-            // term.kill();
-            // console.log("Closed terminal " + term.pid);
-            // Clean things up
-            // delete terminals[term.pid];
+            // pause the running process
+            if(sessions[pid]){
+                term.pause();                
+                sessions[pid].dataHandler.dispose();
+                delete sessions[pid].dataHandler;
+            }
         });
     });
-    /*app.post("/terminals/:pid/terminate", (req, res) => {
+
+    app.post("/terminals/:pid/terminate", (req, res) => {
         const pid = parseInt(req.params.pid);
-        const term = terminals[pid];
-    
+        const { term, xterm, serializeAddon } = sessions[pid];
+
         if (term) {
+            serializeAddon.dispose();
+            xterm.dispose();
             // Terminate the terminal process
             term.kill();
-    
             // Clean up resources
-            delete terminals[pid];
-            delete unsentOutput[pid];
-            delete terminalState[pid];
-    
+            delete sessions[pid];
             console.log("Closed terminal " + pid);
         }
-    
-        res.end();
-    });*/
 
+        res.end();
+    });
 
     const port = parseInt(process.env.PORT || "8767");
     const host = "0.0.0.0";
-    
-    
+
     server.listen(port, host, () => {
-        console.log("AcodeX Server started on port : " + port);
+        console.log("AcodeX Server started on port: " + port);
     });
 }
 

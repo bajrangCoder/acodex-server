@@ -12,11 +12,13 @@ program
         startServer();
     });
 
+// note: Currently its not for normal user
 program
     .command("lsp")
     .description("Starts lsp server for Acode")
     .action(() => {
         startLspServer();
+        console.log("Started lsp server")
     });
 
 program.parse();

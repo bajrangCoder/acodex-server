@@ -29,6 +29,15 @@ dependencies:
   ws:
     specifier: ^8.14.1
     version: 8.14.1
+  xterm:
+    specifier: ^5.3.0
+    version: 5.3.0
+  xterm-addon-serialize:
+    specifier: ^0.11.0
+    version: 0.11.0(xterm@5.3.0)
+  xterm-headless:
+    specifier: ^5.3.0
+    version: 5.3.0
 
 packages:
 
@@ -1091,4 +1100,20 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
+
+  /xterm-addon-serialize@0.11.0(xterm@5.3.0):
+    resolution: {integrity: sha512-2CNDnmLdLkNWfsxNFkGsI5FE9W/BbsMzeOrbu59yNqH9L6k1gmL+Ab6VXxEp2NQUJSzaiqi6t0nFR5k5EDkVIg==}
+    peerDependencies:
+      xterm: ^5.0.0
+    dependencies:
+      xterm: 5.3.0
+    dev: false
+
+  /xterm-headless@5.3.0:
+    resolution: {integrity: sha512-HjKkEgvjlyXfZvI0LdQChOqGL5nDiXge6X2IvoQbOn+oavAKUCX9hKHtDxmWVwxgNCCvXDnfQCYL+3wyHQ9PXA==}
+    dev: false
+
+  /xterm@5.3.0:
+    resolution: {integrity: sha512-8QqjlekLUFTrU6x7xck1MsPzPA571K5zNqWm0M0oroYEWVOptZ0+ubQSkQ3uxIEhcIHRujJy6emDWX4A7qyFzg==}
     dev: false

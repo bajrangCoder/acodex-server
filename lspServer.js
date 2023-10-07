@@ -16,7 +16,12 @@ const servers = [
     {
         args: ["pylsp"],
         nameEndsWith: ".python",
-    }, //add any other language servers here
+    },
+    {
+        args: ["rust-analyzer"],
+        nameEndsWith: ".rust",
+    },
+    //add any other language servers here
 ];
 
 function startLspServer() {
@@ -28,6 +33,7 @@ function startLspServer() {
             server.writer = writer;
 
             reader.listen((message) => {
+                console.log(message)
                 ws.send(JSON.stringify(message));
             });
         });
@@ -37,6 +43,7 @@ function startLspServer() {
             if (parsed.method && parsed.method === "initialize") {
                 parsed.params.rootUri = __dirname;
             }
+            //console.log(parsed.params.textDocument)
             if (
                 !(
                     parsed.params &&
@@ -73,7 +80,7 @@ function startLspServer() {
         });
 
         serverProcess.on("error", (err) => {
-            console.error(`Failed to start ${serverProcess.spawnfile}:```, err);
+            console.error(`Failed to start ${serverProcess.spawnfile}:`, err);
         });
 
         const reader = new StreamMessageReader(serverProcess.stdout);
