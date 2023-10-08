@@ -61,7 +61,6 @@ function startServer() {
             term,
             xterm,
             serializeAddon,
-            dataHandler: null,
             terminalData: "",
         };
 
@@ -105,21 +104,17 @@ function startServer() {
             sessions[pid].temporaryDisposable.dispose();
             delete sessions[pid].temporaryDisposable;
             xterm.write(sessions[pid].terminalData);
-            ws.send(sessions[pid].terminalData)
-        }else{
-            sessions[pid].terminalData = serializeAddon.serialize();
-            // Send the terminal data to the client
-            ws.send(sessions[pid].terminalData);
-            term.resume();
         }
+        // Send the terminal data to the client
+        ws.send(sessions[pid].terminalData);
+        //term.resume();
 
         sessions[pid].dataHandler = term.onData(function (data) {
             try {
-                ws.send(data);
                 xterm.write(
                     typeof data === "string" ? data : new Uint8Array(data)
                 );
-                
+                ws.send(data);
             } catch (ex) {
                 // The WebSocket is not open, ignore
             }
@@ -131,17 +126,19 @@ function startServer() {
 
         ws.on("close", function () {
             // pause the running process
-            if(sessions[pid]){
-                term.pause();                
+            if (sessions[pid] && sessions[pid].dataHandler) {
+                console.log("Terminal " + pid + " is running in background.");
+                //term.pause();
                 sessions[pid].dataHandler.dispose();
                 delete sessions[pid].dataHandler;
+                sessions[pid].terminalData = serializeAddon.serialize();
             }
         });
     });
 
     app.post("/terminals/:pid/terminate", (req, res) => {
         const pid = parseInt(req.params.pid);
-        const { term, xterm, serializeAddon } = sessions[pid];
+        const { term, xterm, serializeAddon, dataHandler } = sessions[pid];
 
         if (term) {
             serializeAddon.dispose();
