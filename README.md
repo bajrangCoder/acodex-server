@@ -12,13 +12,13 @@ npm install -g acodex-server
 
 ## Usage
 
-Run `acodeX-server` to start server
+Run `axs` to start server
 
 ```
-acodeX-server
+axs
 ```
 
-and `acodeX-server --help` for help
+and `axs --help` for help
 
 > More features comming soon...
 

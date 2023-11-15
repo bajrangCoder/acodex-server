@@ -5,7 +5,7 @@ const startServer = require("./terminalServer.js");
 const program = new Command();
 
 program
-    .name("acodeX-server")
+    .name("axs")
     .description("CLI of AcodeX Acode plugin")
     .version("1.0.7")
     .action(() => {

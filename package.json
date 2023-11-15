@@ -4,11 +4,10 @@
   "description": "A server of Acode AcodeX plugin",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
   "bin": {
-    "acodeX-server": "index.js"
+    "axs": "index.js"
   },
   "repository": {
     "type": "git",
