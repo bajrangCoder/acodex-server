@@ -4,7 +4,7 @@ import cors from "cors";
 import * as os from "node:os";
 import * as pty from "node-pty";
 import http from "http";
-import * as fs from 'fs';
+import * as fs from "fs";
 import { Terminal } from "xterm-headless";
 import { SerializeAddon } from "xterm-addon-serialize";
 import { Session } from "../types";
@@ -18,14 +18,13 @@ const sessions: Record<number, Session> = {};
 export function startServer(port: number = 8767, host: string = "0.0.0.0") {
     const app = express();
     app.use(cors());
-    
+
     const server = http.createServer(app);
     const wss = new WebSocket.Server({ noServer: true });
 
-    
     app.get("/", (req: Request, res: Response) => {
         res.send("Hello acodeX-server is working😊...");
-        res.end()
+        res.end();
     });
 
     app.post("/terminals", (req: Request, res: Response) => {
@@ -65,7 +64,6 @@ export function startServer(port: number = 8767, host: string = "0.0.0.0") {
         xterm.loadAddon(serializeAddon);
 
         console.log("Created terminal with PID: " + term.pid);
-
         sessions[term.pid] = {
             term,
             xterm,
@@ -158,20 +156,51 @@ export function startServer(port: number = 8767, host: string = "0.0.0.0") {
 
     app.post("/terminals/:pid/terminate", (req: Request, res: Response) => {
         const pid = parseInt(req.params.pid, 10);
-        const { term, xterm, serializeAddon } = sessions[pid];
+        const session = sessions[pid];
+
+        if (!session) {
+            // Session not found
+            console.error(`Session with PID ${pid} not found.`);
+            res.end();
+            return;
+        }
+
+        const { term, xterm, serializeAddon } = session;
 
         if (term) {
-            serializeAddon.dispose();
-            xterm.dispose();
+            if (session.dataHandler) {
+                session.dataHandler?.dispose();
+                delete session.dataHandler;
+                if (session.terminalData) {
+                    serializeAddon.dispose();
+                    session.terminalData = serializeAddon.serialize();
+                }
+            }
+
+            // Ensure the session exists before attempting to terminate
+            term.onExit(() => {
+                // Dispose of xterm and remove the session after the terminal exits
+                xterm.dispose();
+                delete sessions[pid];
+                console.log("Closed terminal " + pid);
+            });
+
+            // Kill the terminal
             term.kill();
-            delete sessions[pid];
-            console.log("Closed terminal " + pid);
         }
 
         res.end();
     });
 
     server.listen(port, host, () => {
-        console.log(`${coloredText("AcodeX Server", "blue")} started 🔥\n\nHost: ${coloredText(host, "cyan")}\nPort: ${coloredText(port, "cyan")}`);
+        console.log(
+            `${coloredText(
+                "AcodeX Server",
+                "blue"
+            )} started 🔥\n\nHost: ${coloredText(
+                host === "0.0.0.0" ? "localhost" : host,
+                "cyan"
+            )}\nPort: ${coloredText(port, "cyan")}`
+        );
     });
 }

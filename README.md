@@ -13,7 +13,7 @@ Cli for **AcodeX** Plugin
 
 - [ ] ssh client 
 - [ ] security mechanism improvement
-- [ ] stable 
+- [X] stable 
 
 ## Installation
 
