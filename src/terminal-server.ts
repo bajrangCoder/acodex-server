@@ -18,6 +18,7 @@ const sessions: Record<number, Session> = {};
 export function startServer(port: number = 8767, host: string = "0.0.0.0") {
     const app = express();
     app.use(cors());
+    app.use(express.json());
 
     const server = http.createServer(app);
     const wss = new WebSocket.Server({ noServer: true });
@@ -190,6 +191,48 @@ export function startServer(port: number = 8767, host: string = "0.0.0.0") {
         }
 
         res.end();
+    });
+
+    app.post("/execute-command", (req: Request, res: Response) => {
+        const { command } = req.body;
+        if (!command) {
+            return res.status(400).json({ error: "Command is required." });
+        }
+
+        // Execute the command using node-pty
+        const term = pty.spawn(
+            process.platform === "win32" ? "cmd.exe" : "bash",
+            ["-c", command],
+            {
+                name: "xterm-256color",
+                cols: 80,
+                rows: 24,
+                cwd: process.platform === "win32" ? undefined : process.env.HOME
+            }
+        );
+
+        const pattern = [
+            "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
+            "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))"
+        ].join("|");
+        const ansiRegex = new RegExp(pattern, undefined);
+        const ansiRegex2 = new RegExp(pattern, "g");
+
+        let output = "";
+
+        // Listen for data events (output from the command)
+        term.onData(data => {
+            output += data;
+        });
+
+        // Listen for the process to exit
+        term.onExit(() => {
+            // Send the parsed output back to the client
+            res.json({
+                output: ansiRegex.test(output) ? output.replace(ansiRegex2, '') : output
+            });
+            res.end();
+        });
     });
 
     server.listen(port, host, () => {

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Document</title>
+    </head>
+    <body>
+        <script type="text/javascript" charset="utf-8">
+// Assuming you're running this code in a browser environment
+const executeCommand = async (command) => {
+  try {
+    const response = await fetch('http://localhost:8767/execute-command', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({command}),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Output:', result.output);
+  } catch (error) {
+    console.error('Error:', error.message);
+  }
+};
+
+// Example usage
+const commandToExecute = 'golang --version';
+executeCommand(commandToExecute);
+
+        </script>
+    </body>
+</html>
