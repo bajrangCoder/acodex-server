@@ -7,12 +7,14 @@ Cli for **AcodeX** Plugin
 - migrated to typescript codebase
 - reduced build bundle size
 - able to work on local network
+- blazingly fast server powered by hono
+- tiny bundle size
 - somemore.....
 
 ### Todo
 
-- [ ] ssh client 
-- [ ] security mechanism improvement
+- [ ] ssh client
+- [ ] security mechanism improvement(WIP)
 - [X] stable 
 
 ## Installation
