@@ -9,6 +9,7 @@ Cli for **AcodeX** Plugin
 - able to work on local network
 - blazingly fast server powered by hono
 - tiny bundle size
+- stable
 - somemore.....
 
 ### Todo

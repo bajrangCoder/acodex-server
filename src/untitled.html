@@ -15,7 +15,7 @@ const executeCommand = async (command) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({command}),
+      body: JSON.stringify({command,u_cwd:"/data/data/com.termux/files/home/acode-plugin-acodex"}),
     });
 
     if (!response.ok) {
@@ -30,7 +30,7 @@ const executeCommand = async (command) => {
 };
 
 // Example usage
-const commandToExecute = 'golang --version';
+const commandToExecute = 'pwd';
 executeCommand(commandToExecute);
 
         </script>

@@ -225,10 +225,13 @@ export async function startServer(
 
   app.post("/execute-command", async (c, next) => {
     try {
-      const { command } = await c.req.json();
+      const env = { ...process.env };
+      const { command, u_cwd } = await c.req.json();
       if (!command) {
         return c.json({ error: "Command is required." }, 400);
       }
+      
+      const cwd = u_cwd ? u_cwd : process.env.HOME;
 
       // Execute the command using node-pty
       const term = pty.spawn(
@@ -238,7 +241,8 @@ export async function startServer(
           name: "xterm-256color",
           cols: 80,
           rows: 24,
-          cwd: process.platform === "win32" ? undefined : process.env.HOME,
+          cwd: process.platform === "win32" ? undefined : cwd,
+          env
         }
       );
 
