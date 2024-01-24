@@ -1,12 +1,12 @@
 {
   "name": "acodex-server",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Server of Acode AcodeX plugin",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc && esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm --minify"
+    "build": "tsc && node build.mjs"
   },
   "bin": {
     "axs": "dist/index.js",
