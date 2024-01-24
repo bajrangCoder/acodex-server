@@ -1,12 +1,12 @@
 {
   "name": "acodex-server",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Server of Acode AcodeX plugin",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "build": "tsc && node build.mjs"
+    "build": "tsc"
   },
   "bin": {
     "axs": "dist/index.js",
@@ -33,7 +33,6 @@
   "devDependencies": {
     "@types/node": "^20.9.5",
     "@types/ws": "^8.5.10",
-    "esbuild": "^0.19.7",
     "ts-node": "^10.9.1",
     "typescript": "^5.3.2"
   },

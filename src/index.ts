@@ -8,7 +8,7 @@ const program = new Command();
 program
     .name("axs")
     .description("CLI of AcodeX Acode plugin")
-    .version("1.1.1")
+    .version("1.1.2")
     .option("-p, --port <port>", "port to start the server")
     .option("-i, --ip", "start the server on local network (ip)")
     .option("-c, --ssh-client", "start the SSH client server")
@@ -19,10 +19,10 @@ program
                 "Error: Both -a and -c options cannot be used together."
             );
         } else if (options.both) {
-            console.log("Starting both terminal and SSH server");
+            console.log("Starts both terminal and SSH server , Comming Soon...");
             // Add logic for starting both servers
         } else if (options.sshClient) {
-            console.log("Starting the SSH client server");
+            console.log("Start the SSH client server, Comming Soon");
             // Add logic for starting only the SSH server
         } else if (options.port) {
             startServer(options.port);

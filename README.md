@@ -8,7 +8,6 @@ Cli for **AcodeX** Plugin
 - reduced build bundle size
 - able to work on local network
 - blazingly fast server powered by hono
-- tiny bundle size
 - stable
 - somemore.....
 
