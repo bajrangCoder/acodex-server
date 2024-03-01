@@ -8,7 +8,7 @@ const program = new Command();
 program
 	.name("axs")
 	.description("CLI of AcodeX Acode plugin")
-	.version("1.1.3")
+	.version("1.1.4")
 	.option("-p, --port <port>", "port to start the server")
 	.option("-i, --ip", "start the server on local network (ip)")
 	.action(options => {

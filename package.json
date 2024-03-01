@@ -1,6 +1,6 @@
 {
   "name": "acodex-server",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Server of Acode AcodeX plugin",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -9,9 +9,9 @@
     "build": "webpack"
   },
   "bin": {
-    "axs": "dist/index.js",
-    "acodex-server": "dist/index.js",
-    "acodeX-server": "dist/index.js"
+    "axs": "bin/acodex-server",
+    "acodex-server": "bin/acodex-server",
+    "acodeX-server": "bin/acodex-server"
   },
   "repository": {
     "type": "git",
