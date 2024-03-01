@@ -2,21 +2,6 @@
 
 Cli for **AcodeX** Plugin
 
-## ChangeLogs
-
-- migrated to typescript codebase
-- reduced build bundle size
-- able to work on local network
-- blazingly fast server powered by hono
-- stable
-- somemore.....
-
-### Todo
-
-- [ ] ssh client
-- [ ] security mechanism improvement(WIP)
-- [X] stable 
-
 ## Installation
 
 Run `npm install -g acodex-server` for installing.

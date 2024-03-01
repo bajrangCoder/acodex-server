@@ -6,40 +6,31 @@ import { getIPAddress } from "./helpers";
 const program = new Command();
 
 program
-    .name("axs")
-    .description("CLI of AcodeX Acode plugin")
-    .version("1.1.2")
-    .option("-p, --port <port>", "port to start the server")
-    .option("-i, --ip", "start the server on local network (ip)")
-    .option("-c, --ssh-client", "start the SSH client server")
-    .option("-a, --both", "start both terminal and SSH server")
-    .action(options => {
-        if (options.both && options.sshClient) {
-            console.error(
-                "Error: Both -a and -c options cannot be used together."
-            );
-        } else if (options.both) {
-            console.log("Starts both terminal and SSH server , Comming Soon...");
-            // Add logic for starting both servers
-        } else if (options.sshClient) {
-            console.log("Start the SSH client server, Comming Soon");
-            // Add logic for starting only the SSH server
-        } else if (options.port) {
-            startServer(options.port);
-        } else if (options.ip) {
-            const ipdr = getIPAddress();
-            if (ipdr === false) {
-                startServer();
-            } else {
-                if (options.port) {
-                    startServer(options.port, `${ipdr}`);
-                } else {
-                    startServer(undefined, `${ipdr}`);
-                }
-            }
-        } else {
-            startServer();
-        }
-    });
+	.name("axs")
+	.description("CLI of AcodeX Acode plugin")
+	.version("1.1.3")
+	.option("-p, --port <port>", "port to start the server")
+	.option("-i, --ip", "start the server on local network (ip)")
+	.action(options => {
+		if (options.port && options.ip) {
+			const ipdr = getIPAddress();
+			if (ipdr === false) {
+				console.error("Failed to retrieve IP address.");
+				return;
+			}
+			startServer(options.port, ipdr.toString());
+		} else if (options.port) {
+			startServer(options.port);
+		} else if (options.ip) {
+			const ipdr = getIPAddress();
+			if (ipdr === false) {
+				console.error("Failed to retrieve IP address.");
+				return;
+			}
+			startServer(undefined, ipdr.toString());
+		} else {
+			startServer();
+		}
+	});
 
 program.parse();
