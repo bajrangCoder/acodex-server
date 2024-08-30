@@ -5,8 +5,8 @@ import WebSocket from "ws";
 import * as os from "node:os";
 import * as pty from "node-pty";
 import http from "http";
-import { Terminal } from "xterm-headless";
-import { SerializeAddon } from "xterm-addon-serialize";
+import { Terminal } from '@xterm/headless';
+import { SerializeAddon } from "@xterm/addon-serialize";
 import { Session } from "../types";
 import { coloredText } from "./helpers";
 
