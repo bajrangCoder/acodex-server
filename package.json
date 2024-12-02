@@ -14,7 +14,7 @@
     "acodeX-server": "bin/acodex-server"
   },
   "repository": {
-    "type": "git",
+    "type": "module",
     "url": "git+https://github.com/bajrangCoder/acodex-server.git"
   },
   "keywords": [
