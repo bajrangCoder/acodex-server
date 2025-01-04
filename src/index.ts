@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+#!/data/data/com.termux/files/usr/bin/env node
+require("../dist/index.js");
 import { Command } from "commander";
 import { startServer } from "./terminal-server";
 import { getIPAddress } from "./helpers";
