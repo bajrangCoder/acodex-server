@@ -1,4 +1,2 @@
-#!/usr/bin/env node
-require("../dist/index.js");
 #!/data/data/com.termux/files/usr/bin/env node
 require("../dist/index.js");

@@ -20,6 +20,6 @@ axs
 
 and `axs --help` for help
 
-> More features comming soon...
+> More features coming soon...
 
 :)
