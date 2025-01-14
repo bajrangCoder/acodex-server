@@ -1,5 +1,8 @@
 # AcodeX-Server
 
+> [!WARNING]
+> It is recommended to avoid using this implementation. Instead, consider using [this alternative](https://github.com/bajrangCoder/acodex_server), which is lightweight, faster, and offers several advantages.
+
 Cli for **AcodeX** Plugin
 
 ## Installation
